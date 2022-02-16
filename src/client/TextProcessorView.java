@@ -36,7 +36,7 @@ public class TextProcessorView {
 	private File selectedFile;
 	private Engine engine;
 	private JTextArea textArea;
-	private List<List<String>> inputSpec;
+	private List<List<String>> inputtedRules;
 
 	private JFrame frame;
 	
@@ -103,13 +103,13 @@ public class TextProcessorView {
 				panel.setEnabled(false);
 				panel.setVisible(false);
 				String filename = selectedFile.getName(); 
-				if(rdbtnRawRadioButton.isSelected()==true) { //Depending on user selection create an engine with RAW/ANNOTATED argument
+				if(rdbtnRawRadioButton.isSelected()) { //Depending on user selection create an engine with RAW/ANNOTATED argument
 					engine = new Engine(path, "RAW", filename);
-					engine.registerInputRuleSetForPlainFiles(inputSpec);
+					engine.registerInputRuleSetForPlainFiles(inputtedRules);
 				}
 				else {
 					engine = new Engine(path, "ANNOTATED", filename);
-					List<String> prefixes = new ArrayList<String>();
+					List<String> prefixes = new ArrayList<>();
 					
 					//Fill the prefixes list
 					prefixes.add("<H1>");
@@ -118,7 +118,7 @@ public class TextProcessorView {
 					prefixes.add("<b>");
 					prefixes.add("<p>");
 					
-					engine.registerInputRuleSetForAnnotatedFiles(inputSpec, prefixes);
+					engine.registerInputRuleSetForAnnotatedFiles(inputtedRules, prefixes);
 				}
 			}
 		});
@@ -147,11 +147,11 @@ public class TextProcessorView {
 					System.exit(-1);
 				}
 				
-				List<String> IntermidiateList = new ArrayList<String>();
-				IntermidiateList.addAll(Arrays.asList(textAreaRulesetInputText.split("\n")));  //splits the text to lines
-				inputSpec = new ArrayList<List<String> >(); 
-				for(String line: IntermidiateList){
-					inputSpec.add(Arrays.asList(line.split(" ", 3))); //maximum of three arguments. Excess arguments are ignored.
+				List<String> rulesetLinesList = new ArrayList<String>();
+				rulesetLinesList.addAll(Arrays.asList(textAreaRulesetInputText.split("\n")));  //splits the text to lines
+				inputtedRules = new ArrayList<List<String> >();
+				for(String line: rulesetLinesList){
+					inputtedRules.add(Arrays.asList(line.split(" ", 3))); //maximum of three arguments. Excess arguments are ignored.
 				}
 				
 			}
@@ -219,13 +219,16 @@ public class TextProcessorView {
 		mnExportMenu.setEnabled(false);
 		mnFileMenu.add(mnExportMenu);
 		JMenuItem mntmShowReportItem = new JMenuItem("Show Report");
-		
+		//Report choice
+
+		mntmShowReportItem.setEnabled(false);
+
 		//Gets the document's to open path.
 		JMenuItem mntmOpenDocument = new JMenuItem("Open Document");
 		mntmOpenDocument.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if(inputSpec == null) {
+				if(inputtedRules == null) {
 					System.out.println("TextProcessorView: List of rules is empty. Please enter the ruleset before opening a file. Exiting.");
 					System.exit(-1);
 				}
@@ -240,6 +243,12 @@ public class TextProcessorView {
 					panel.setVisible(true);
 					mnExportMenu.setEnabled(true);
 					mntmShowReportItem.setEnabled(true);
+					mntmShowReportItem.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mousePressed(MouseEvent e) {
+							textArea.setText(engine.reportWithStats().toString());
+						}
+					});
 				}
 			}
 		});
@@ -247,16 +256,9 @@ public class TextProcessorView {
 		
 		JSeparator separator_1 = new JSeparator();
 		mnFileMenu.add(separator_1);
-		
-		//Report choice
-		mntmShowReportItem.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				textArea.setText(engine.reportWithStats().toString());
-			}
-		});
+
 		mnFileMenu.add(mntmShowReportItem);
-		mntmShowReportItem.setEnabled(false);		
+
 		
 		JFileChooser fileChooserSave = new JFileChooser();
 		fileChooserSave.setDialogTitle("Specify a file to save");   

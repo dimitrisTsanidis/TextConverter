@@ -33,10 +33,8 @@ public class RawFileLineLoader {
 					if(!(input.hasNext())) { //if it isn't the last line of the document
 						sb.append(Line);	 //append this line too, as it is the last of this lineBlock.
 					}
-					if(sb.toString().isBlank()||sb.toString().isEmpty()) {
-						
-					}
-					else { //Triggers when the current line is blank but the whole paragraph is not. Stores the current read string as a LineBlock and resets the reader.
+					if(sb.toString().isBlank()||sb.toString().isEmpty()){}
+					else { //Case when the current line is blank but the whole paragraph is not. Stores the current read string as a LineBlock and resets the reader.
 						   //Practically ensures that double blank lines aren't converted into LineBlocks.
 						LineBlock lineBlock = new LineBlock(sb.toString());
 						sb.delete(0, sb.length());
